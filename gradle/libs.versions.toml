@@ -1,0 +1,17 @@
+[versions]
+agp = "9.0.1"
+playServicesWearable = "19.0.0"
+wearRemoteInteractions = "1.1.0"
+media3 = "1.8.0"
+annotationExperimental = "1.4.1"
+
+[libraries]
+play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
+androidx-wear-remote-interactions = { group = "androidx.wear", name = "wear-remote-interactions", version.ref = "wearRemoteInteractions" }
+media3-transformer = { group = "androidx.media3", name = "media3-transformer", version.ref = "media3" }
+media3-effect = { group = "androidx.media3", name = "media3-effect", version.ref = "media3" }
+media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
+androidx-annotation-experimental = { group = "androidx.annotation", name = "annotation-experimental", version.ref = "annotationExperimental" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }

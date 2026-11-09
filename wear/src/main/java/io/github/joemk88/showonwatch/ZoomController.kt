@@ -1,0 +1,129 @@
+package io.github.joemk88.showonwatch
+
+import android.view.GestureDetector
+import android.view.InputDevice
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.View
+import android.view.ViewConfiguration
+import kotlin.math.exp
+import kotlin.math.min
+
+/**
+ * Shared zoom/pan state and gestures for photos and videos: pinch to zoom,
+ * drag to pan, double-tap to zoom in/out, crown (rotary) to zoom, optional
+ * single tap. The view applies [scale], [tx], [ty] however it draws.
+ */
+class ZoomController(
+    private val view: View,
+    private val maxZoom: Float,
+    private val onChange: () -> Unit,
+    private val onSingleTap: (() -> Unit)? = null
+) {
+    var contentW = 0; private set
+    var contentH = 0; private set
+    var scale = 1f; private set
+    var tx = 0f; private set
+    var ty = 0f; private set
+    private var minScale = 1f
+
+    private val scaleDetector = ScaleGestureDetector(view.context,
+        object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(d: ScaleGestureDetector): Boolean {
+                zoomBy(d.scaleFactor, d.focusX, d.focusY); return true
+            }
+        })
+
+    private val gestureDetector = GestureDetector(view.context,
+        object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDown(e: MotionEvent) = true
+            override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float): Boolean {
+                tx -= dx; ty -= dy; clamp(); onChange(); return true
+            }
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                if (scale > minScale * 1.05f) reset() else zoomBy(3f, e.x, e.y)
+                return true
+            }
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                onSingleTap?.invoke()
+                return onSingleTap != null
+            }
+        })
+
+    private val rotaryFactor = ViewConfiguration.get(view.context).scaledVerticalScrollFactor
+
+    /** Sets the content's natural size. Re-fits only if the size actually changed. */
+    fun setContentSize(w: Int, h: Int) {
+        if (w == contentW && h == contentH) return
+        contentW = w
+        contentH = h
+        reset()
+    }
+
+    /** Forget the content so the next [setContentSize] always re-fits (new item). */
+    fun clearContent() {
+        contentW = 0
+        contentH = 0
+    }
+
+    /** Fit to screen and centre. Also call when the view's size changes. */
+    fun reset() {
+        if (contentW == 0 || contentH == 0 || view.width == 0 || view.height == 0) return
+        minScale = min(view.width.toFloat() / contentW, view.height.toFloat() / contentH)
+        scale = minScale
+        tx = (view.width - contentW * scale) / 2f
+        ty = (view.height - contentH * scale) / 2f
+        onChange()
+    }
+
+    private fun zoomBy(factor: Float, fx: Float, fy: Float) {
+        if (contentW == 0) return
+        val newScale = (scale * factor).coerceIn(minScale, minScale * maxZoom)
+        val k = newScale / scale
+        tx = fx - (fx - tx) * k
+        ty = fy - (fy - ty) * k
+        scale = newScale
+        clamp()
+        onChange()
+    }
+
+    private fun clamp() {
+        val w = contentW * scale
+        val h = contentH * scale
+        val vw = view.width.toFloat()
+        val vh = view.height.toFloat()
+        tx = if (w <= vw) (vw - w) / 2f else tx.coerceIn(vw - w, 0f)
+        ty = if (h <= vh) (vh - h) / 2f else ty.coerceIn(vh - h, 0f)
+    }
+
+    fun onTouchEvent(event: MotionEvent): Boolean {
+        scaleDetector.onTouchEvent(event)
+        if (!scaleDetector.isInProgress) gestureDetector.onTouchEvent(event)
+        return true
+    }
+
+    /** Crown: rotate to zoom around the centre. */
+    fun onGenericMotionEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_SCROLL &&
+            event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)
+        ) {
+            val delta = -event.getAxisValue(MotionEvent.AXIS_SCROLL) * rotaryFactor
+            zoomBy(exp(delta / 400f), view.width / 2f, view.height / 2f)
+            return true
+        }
+        return false
+    }
+
+    // Lets Wear's swipe-to-dismiss only trigger once you're at the left edge.
+    fun canScrollHorizontally(direction: Int): Boolean {
+        val w = contentW * scale
+        if (contentW == 0 || w <= view.width + 0.5f) return false
+        return if (direction < 0) tx < -0.5f else tx + w > view.width + 0.5f
+    }
+
+    fun canScrollVertically(direction: Int): Boolean {
+        val h = contentH * scale
+        if (contentH == 0 || h <= view.height + 0.5f) return false
+        return if (direction < 0) ty < -0.5f else ty + h > view.height + 0.5f
+    }
+}
