@@ -10,6 +10,9 @@ and it opens on your wrist.
 - **Videos:** play muted on a loop; tap for sound. Zoom and pan work the same way (up to 4×).
 - Swipe right to close. Reopening the watch app shows the last thing you sent.
 
+<img width="1224" height="980" alt="ShowOnWatch" src="https://github.com/user-attachments/assets/89ed3b45-017f-41ff-9f6a-7b7707421a22" />
+
+
 ## Download
 
 Get both APKs from the [latest release](https://github.com/joemk88/ShowOnWatch/releases/latest):
