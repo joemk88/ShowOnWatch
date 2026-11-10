@@ -1,4 +1,4 @@
-# Show on watch
+# Show on Watch
 
 View photos and videos from your e-ink Android phone in full colour on your Wear OS watch.
 
@@ -19,8 +19,8 @@ Get both APKs from the [latest release](https://github.com/joemk88/ShowOnWatch/r
 
 | File | Install on |
 |---|---|
-| `ShowOnWatch-phone-<version>.apk` | your phone |
-| `ShowOnWatch-watch-<version>.apk` | your watch |
+| `mobile-release.apk` | your phone |
+| `wear-release.apk` | your watch |
 
 **You need both**, from the **same release**. They're signed with the same key, which is how
 the phone and watch apps recognise each other.
