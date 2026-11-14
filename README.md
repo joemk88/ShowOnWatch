@@ -1,4 +1,4 @@
-# Show on watch
+# Show on Watch
 
 View photos and videos from your e-ink Android phone in full colour on your Wear OS watch.
 
@@ -10,14 +10,17 @@ and it opens on your wrist.
 - **Videos:** play muted on a loop; tap for sound. Zoom and pan work the same way (up to 4×).
 - Swipe right to close. Reopening the watch app shows the last thing you sent.
 
+<img width="1224" height="980" alt="ShowOnWatch" src="https://github.com/user-attachments/assets/89ed3b45-017f-41ff-9f6a-7b7707421a22" />
+
+
 ## Download
 
 Get both APKs from the [latest release](https://github.com/joemk88/ShowOnWatch/releases/latest):
 
 | File | Install on |
 |---|---|
-| `ShowOnWatch-phone-<version>.apk` | your phone |
-| `ShowOnWatch-watch-<version>.apk` | your watch |
+| `mobile-release.apk` | your phone |
+| `wear-release.apk` | your watch |
 
 **You need both**, from the **same release**. They're signed with the same key, which is how
 the phone and watch apps recognise each other.
