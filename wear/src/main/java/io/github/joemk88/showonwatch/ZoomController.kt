@@ -11,15 +11,23 @@ import kotlin.math.min
 
 /**
  * Shared zoom/pan state and gestures for photos and videos: pinch to zoom,
- * drag to pan, double-tap to zoom in/out, crown (rotary) to zoom, optional
- * single tap. The view applies [scale], [tx], [ty] however it draws.
+ * drag to pan, crown (rotary) to zoom, plus an optional double-tap callback.
+ * A single tap is reported as a normal click (view.performClick()), so it also
+ * works with accessibility services. The view applies [scale], [tx], [ty] however it draws.
  */
 class ZoomController(
     private val view: View,
     private val maxZoom: Float,
     private val onChange: () -> Unit,
-    private val onSingleTap: (() -> Unit)? = null
+    private val onDoubleTap: (() -> Unit)? = null
 ) {
+    /**
+     * True while the screen is turned upside down (the parent is rotated 180°).
+     * Touch input is already mapped by Android, but the swipe-to-dismiss check
+     * asks in screen directions, so those answers have to be reversed.
+     */
+    var flipped = false
+
     var contentW = 0; private set
     var contentH = 0; private set
     var scale = 1f; private set
@@ -41,12 +49,12 @@ class ZoomController(
                 tx -= dx; ty -= dy; clamp(); onChange(); return true
             }
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                if (scale > minScale * 1.05f) reset() else zoomBy(3f, e.x, e.y)
-                return true
+                onDoubleTap?.invoke()
+                return onDoubleTap != null
             }
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                onSingleTap?.invoke()
-                return onSingleTap != null
+                view.performClick()
+                return true
             }
         })
 
@@ -115,13 +123,15 @@ class ZoomController(
     }
 
     // Lets Wear's swipe-to-dismiss only trigger once you're at the left edge.
-    fun canScrollHorizontally(direction: Int): Boolean {
+    fun canScrollHorizontally(screenDirection: Int): Boolean {
+        val direction = if (flipped) -screenDirection else screenDirection
         val w = contentW * scale
         if (contentW == 0 || w <= view.width + 0.5f) return false
         return if (direction < 0) tx < -0.5f else tx + w > view.width + 0.5f
     }
 
-    fun canScrollVertically(direction: Int): Boolean {
+    fun canScrollVertically(screenDirection: Int): Boolean {
+        val direction = if (flipped) -screenDirection else screenDirection
         val h = contentH * scale
         if (contentH == 0 || h <= view.height + 0.5f) return false
         return if (direction < 0) ty < -0.5f else ty + h > view.height + 0.5f

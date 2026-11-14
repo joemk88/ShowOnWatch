@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -20,11 +21,13 @@ class ViewerActivity : Activity() {
     private lateinit var videoView: ZoomVideoView
     private lateinit var status: TextView
     private lateinit var hint: TextView
+    private lateinit var root: FrameLayout
 
     private var wantedId = 0L
     private var wantedVideo = false
     private var shownId = -1L
     private var showingVideo = false
+    private var flipped = false
 
     private val handler = Handler(Looper.getMainLooper())
     private val onNewItem: () -> Unit = { refresh() }
@@ -37,11 +40,16 @@ class ViewerActivity : Activity() {
         super.onCreate(savedInstanceState)
         val density = resources.displayMetrics.density
 
-        imageView = ZoomImageView(this)
+        // Pinch / crown zoom on both; double-tap turns the screen upside down
+        // so you can show it to someone by turning your wrist toward them.
+        imageView = ZoomImageView(this).apply {
+            onDoubleTap = { toggleFlip() }
+        }
 
-        // Pinch / crown / double-tap zoom like photos; single tap toggles sound.
+        // Single tap on a video toggles sound.
         videoView = ZoomVideoView(this).apply {
             visibility = View.GONE
+            onDoubleTap = { toggleFlip() }
             onTap = {
                 muted = !muted
                 showHint(if (muted) "Muted" else "Sound on")
@@ -65,14 +73,15 @@ class ViewerActivity : Activity() {
             visibility = View.GONE
         }
 
-        setContentView(FrameLayout(this).apply {
+        root = FrameLayout(this).apply {
             setBackgroundColor(Color.BLACK)
             addView(imageView, FrameLayout.LayoutParams(-1, -1))
             addView(videoView, FrameLayout.LayoutParams(-1, -1, Gravity.CENTER))
             addView(status, FrameLayout.LayoutParams(-1, -1))
             addView(hint, FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
                 .apply { bottomMargin = (28 * density).toInt() })
-        })
+        }
+        setContentView(root)
         imageView.requestFocus()   // so the crown reaches the image view
         handleIntent(intent)
     }
@@ -129,6 +138,7 @@ class ViewerActivity : Activity() {
 
     private fun show(item: ImageStore.Latest) {
         if (item.id == shownId) { status.visibility = View.GONE; return }
+        setFlipped(false, animate = false)   // new items always arrive upright for you
         when (item.kind) {
             ImageStore.Kind.IMAGE -> {
                 val bmp = BitmapFactory.decodeFile(item.file.path)
@@ -158,6 +168,24 @@ class ViewerActivity : Activity() {
         videoView.stop()
         videoView.visibility = View.GONE
         showingVideo = false
+    }
+
+    private fun toggleFlip() {
+        setFlipped(!flipped, animate = true)
+        // You're not looking at the screen when you do this, so confirm with a buzz.
+        root.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+    }
+
+    /** Rotates everything 180°. Android maps touches through the rotation automatically. */
+    private fun setFlipped(value: Boolean, animate: Boolean) {
+        flipped = value
+        imageView.flipped = value
+        videoView.flipped = value
+        val target = if (value) 180f else 0f
+        root.animate().cancel()
+        if (animate) root.animate().rotation(target).setDuration(250).start()
+        else root.rotation = target
+        keepScreenOnForAWhile()
     }
 
     private fun showHint(text: String) {

@@ -17,7 +17,12 @@ import android.view.TextureView
 class ZoomVideoView(context: Context) : TextureView(context), TextureView.SurfaceTextureListener {
 
     var onTap: (() -> Unit)? = null
+    var onDoubleTap: (() -> Unit)? = null
     var onError: (() -> Unit)? = null
+
+    var flipped: Boolean
+        get() = zoom.flipped
+        set(value) { zoom.flipped = value }
 
     var muted = true
         set(value) { field = value; applyVolume() }
@@ -25,7 +30,7 @@ class ZoomVideoView(context: Context) : TextureView(context), TextureView.Surfac
     private val zoom = ZoomController(
         this, maxZoom = 4f,
         onChange = { applyTransform() },
-        onSingleTap = { onTap?.invoke() }
+        onDoubleTap = { this.onDoubleTap?.invoke() }
     )
     private val transformMatrix = Matrix()
 
@@ -154,6 +159,13 @@ class ZoomVideoView(context: Context) : TextureView(context), TextureView.Surfac
 
     // --- Input ---
     override fun onTouchEvent(event: MotionEvent) = zoom.onTouchEvent(event)
+
+    // Single tap (or an accessibility click) toggles sound via onTap.
+    override fun performClick(): Boolean {
+        super.performClick()
+        onTap?.invoke()
+        return true
+    }
 
     override fun onGenericMotionEvent(event: MotionEvent) =
         zoom.onGenericMotionEvent(event) || super.onGenericMotionEvent(event)

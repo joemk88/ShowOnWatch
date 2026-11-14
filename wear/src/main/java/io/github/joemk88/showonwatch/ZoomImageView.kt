@@ -8,13 +8,23 @@ import android.graphics.Paint
 import android.view.MotionEvent
 import android.view.View
 
-/** Photo view: fit-to-screen with the shared zoom gestures (up to 8×). */
+/** Photo view: fit-to-screen with the shared zoom gestures (up to 8×) and double-tap callback. */
 class ZoomImageView(context: Context) : View(context) {
 
     private var bitmap: Bitmap? = null
     private val drawMatrix = Matrix()
     private val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
-    private val zoom = ZoomController(this, maxZoom = 8f, onChange = { invalidate() })
+    var onDoubleTap: (() -> Unit)? = null
+
+    var flipped: Boolean
+        get() = zoom.flipped
+        set(value) { zoom.flipped = value }
+
+    private val zoom = ZoomController(
+        this, maxZoom = 8f,
+        onChange = { invalidate() },
+        onDoubleTap = { onDoubleTap?.invoke() }
+    )
 
     init {
         isFocusable = true
@@ -38,6 +48,12 @@ class ZoomImageView(context: Context) : View(context) {
     }
 
     override fun onTouchEvent(event: MotionEvent) = zoom.onTouchEvent(event)
+
+    // Single taps arrive here via ZoomController; nothing extra to do for photos.
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
 
     override fun onGenericMotionEvent(event: MotionEvent) =
         zoom.onGenericMotionEvent(event) || super.onGenericMotionEvent(event)
