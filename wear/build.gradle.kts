@@ -16,7 +16,9 @@ android {
         applicationId = "io.github.joemk88.showonwatch"
         minSdk = 30
         targetSdk = 36
-        versionCode = 4
+        // Play needs version codes to be unique across the phone and watch builds of one app,
+        // so the watch uses 1000 + the phone's code (phone 4 -> watch 1004).
+        versionCode = 1004
         versionName = "1.3"
     }
 
