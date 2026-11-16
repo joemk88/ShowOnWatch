@@ -1,8 +1,44 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="48dp" android:height="48dp"
     android:viewportWidth="48" android:viewportHeight="48">
-    <path android:fillColor="#FF202020" android:pathData="M24,0A24,24 0,1 1,23.99,0Z"/>
-    <path android:fillColor="#FFFFFFFF" android:pathData="M19,7h10l1.5,6h-13z M19,41h10l1.5,-6h-13z"/>
-    <path android:fillColor="#FFFFFFFF" android:pathData="M24,12a12,12 0,1 1,-0.01,0z"/>
-    <path android:fillColor="#FF202020" android:pathData="M17,29l4,-5 3,3.5 2.5,-3 4.5,4.5z M27,19.5a1.8,1.8 0,1 1,-0.01,0z"/>
+
+    <!-- Thin white outline so the black watch still shows on dark launchers (e.g. the watch's app list).
+         Drawn first; the black shapes cover its inner half. Invisible on white backgrounds. -->
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:fillColor="#00000000" android:pathData="M17.6,1.5H30.4Q31.6,1.5 31.8,2.7L33.6,13H14.4L16.2,2.7Q16.4,1.5 17.6,1.5Z" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:fillColor="#00000000" android:pathData="M17.6,46.5H30.4Q31.6,46.5 31.8,45.3L33.6,35H14.4L16.2,45.3Q16.4,46.5 17.6,46.5Z" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:fillColor="#00000000" android:pathData="M24,8.5a15.5,15.5 0,1 1,0 31a15.5,15.5 0,1 1,0 -31Z" />
+
+    <!-- Strap: top and bottom -->
+    <path android:fillColor="#FF000000"
+        android:pathData="M17.6,1.5H30.4Q31.6,1.5 31.8,2.7L33.6,13H14.4L16.2,2.7Q16.4,1.5 17.6,1.5Z" />
+    <path android:fillColor="#FF000000"
+        android:pathData="M17.6,46.5H30.4Q31.6,46.5 31.8,45.3L33.6,35H14.4L16.2,45.3Q16.4,46.5 17.6,46.5Z" />
+
+    <!-- Bezel -->
+    <path android:fillColor="#FF000000"
+        android:pathData="M24,8.5a15.5,15.5 0,1 1,0 31a15.5,15.5 0,1 1,0 -31Z" />
+
+    <!-- Watch face -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M24,11.5a12.5,12.5 0,1 1,0 25a12.5,12.5 0,1 1,0 -25Z" />
+
+    <!-- Landscape picture, clipped to the face so the bezel acts as its frame -->
+    <group>
+        <clip-path android:pathData="M24,11.5a12.5,12.5 0,1 1,0 25a12.5,12.5 0,1 1,0 -25Z" />
+        <!-- Mountains -->
+        <path android:strokeColor="#FF000000"
+            android:strokeWidth="2"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round"
+            android:fillColor="#00000000"
+            android:pathData="M9,32.5L19.5,21.5L25.5,29L29.5,25L39,33.5" />
+        <!-- Sun -->
+        <path android:strokeColor="#FF000000"
+            android:strokeWidth="1.8"
+            android:fillColor="#00000000"
+            android:pathData="M29.5,16.2a2.5,2.5 0,1 1,0 5a2.5,2.5 0,1 1,0 -5Z" />
+    </group>
 </vector>
