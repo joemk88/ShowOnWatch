@@ -96,6 +96,7 @@ pages usually share as a link, not a file, so download them first.
 uninstall that version from the phone and the watch first, since it's signed with a different key.
 
 ## Changelog
+- **1.3** – double-tap flips image vertically
 - **1.2** – pinch, crown and double-tap zoom for videos.
 - **1.1** – video support. Sending runs in the background with a progress notification.
 - **1.0** – images.
